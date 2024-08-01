@@ -25,4 +25,7 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	jvmArgs = listOf(
+		"-XX:+EnableDynamicAgentLoading",
+	)
 }
