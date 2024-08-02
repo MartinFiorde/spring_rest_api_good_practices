@@ -18,8 +18,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 class CashCardJsonTest {
 
+    private final JacksonTester<CashCard> jsonTester;
+
     @Autowired
-    private JacksonTester<CashCard> json;
+    public CashCardJsonTest(JacksonTester<CashCard> jsonTester) {
+        this.jsonTester = jsonTester;
+    }
 
     @Test
     void cashCardSerializationTest() throws IOException {
@@ -33,7 +37,7 @@ class CashCardJsonTest {
 
         // ACT - Calling a Method/Unit that is being tested
         CashCard cashCard = new CashCard(99L, 123.45);
-        JsonContent<CashCard> resultSerializedJson = json.write(cashCard);
+        JsonContent<CashCard> resultSerializedJson = jsonTester.write(cashCard);
 
         // ASSERT - Verify that the expected result is correct or not
         assertThat(resultSerializedJson)
@@ -63,7 +67,7 @@ class CashCardJsonTest {
                     "amount":123.45
                 }
                 """;
-        CashCard resultDeserializedCashCard = json.parseObject(baseJson); // Deserializing JSON
+        CashCard resultDeserializedCashCard = jsonTester.parseObject(baseJson); // Deserializing JSON
 
         // ASSERT - Verify that the expected result is correct or not
         assertThat(resultDeserializedCashCard).isEqualTo(expectedCashCard); // With Junit 5 Assertions.assertEquals(expectedCashCard, resultDeserializedCashCard)
