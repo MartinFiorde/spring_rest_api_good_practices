@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.3.2"
@@ -28,4 +30,19 @@ tasks.withType<Test> {
 	jvmArgs = listOf(
 		"-XX:+EnableDynamicAgentLoading",
 	)
+}
+
+// This section causes useful test output to go to the terminal.
+tasks.test {
+	testLogging {
+		events("passed", "skipped", "failed") //, "standardOut", "standardError"
+
+		showExceptions = true
+		exceptionFormat = TestExceptionFormat.FULL
+		showCauses = true
+		showStackTraces = true
+
+		// Change to true for more verbose test output
+		showStandardStreams = false
+	}
 }
