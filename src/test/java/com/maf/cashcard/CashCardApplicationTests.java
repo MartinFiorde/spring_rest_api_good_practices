@@ -27,13 +27,16 @@ class CashCardApplicationTests {
 
 	@Test
 	void shouldReturnACashCardWhenDataIsSaved() {
-		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/99", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99.
+		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/99000000000", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99.
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 		DocumentContext documentContext = JsonPath.parse(response.getBody());
 		Number id = documentContext.read("$.id");
-		assertThat(id).isEqualTo(99);
+		assertThat(id).isEqualTo(99000000000L);
+
+		Double amount = documentContext.read("$.amount");
+		assertThat(amount).isEqualTo(123.45);
 	}
 
 	@Test
