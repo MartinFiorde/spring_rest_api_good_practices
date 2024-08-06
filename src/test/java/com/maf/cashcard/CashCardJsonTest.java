@@ -2,6 +2,8 @@ package com.maf.cashcard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CashCardJsonTest {
 
     private final JacksonTester<CashCard> jsonTester;
+    CashCard cashCardBase = new CashCard(99000000000L, 123.45);
 
     @Autowired
     public CashCardJsonTest(JacksonTester<CashCard> jsonTester) {
@@ -26,56 +29,50 @@ class CashCardJsonTest {
     }
 
     @Test
-    void cashCardSerializationTest() throws IOException {
+    void cashCardSerializationTest() throws IOException, JSONException {
         // ARRANGE - Setting up the data that required for the test case
-        ClassPathResource resource = new ClassPathResource("static/expected.json");
-        String expectedJson = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(expectedJson);
-        long expectedId = jsonNode.get("id").asLong();
-        double expectedAmount = jsonNode.get("amount").asDouble();
+        CashCard cashCard = cashCardBase;
 
         // ACT - Calling a Method/Unit that is being tested
-        CashCard cashCard = new CashCard(99L, 123.45);
         JsonContent<CashCard> resultSerializedJson = jsonTester.write(cashCard);
 
         // ASSERT - Verify that the expected result is correct or not
+        ClassPathResource resource = new ClassPathResource("static/expected.json");
+        String expectedJson = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
+
         assertThat(resultSerializedJson)
                 .isStrictlyEqualToJson(expectedJson)
-                .hasJsonPathNumberValue("@.id")
-                .hasJsonPathNumberValue("@.amount");
+                .hasJsonPath("@.id")
+                .hasJsonPath("@.amount");
         assertThat(resultSerializedJson.getJson())
-                .contains("\"id\":" + expectedId)
-                .contains("\"amount\":" + expectedAmount);
+                .contains("\"id\":" + cashCard.id())
+                .contains("\"amount\":" + cashCard.amount());
 //        ORIGINAL ASSERTS
-//        assertThat(json.write(cashCard)).isStrictlyEqualToJson("expected.json")
-//        assertThat(json.write(cashCard)).hasJsonPathNumberValue("@.id")
-//        assertThat(json.write(cashCard)).extractingJsonPathNumberValue("@.id").isEqualTo(99)
-//        assertThat(json.write(cashCard)).hasJsonPathNumberValue("@.amount")
-//        assertThat(json.write(cashCard)).extractingJsonPathNumberValue("@.amount").isEqualTo(123.45)
+//        assertThat(resultSerializedJson).isStrictlyEqualToJson(new ClassPathResource("static/expected.json").getFile())
+//        assertThat(resultSerializedJson).hasJsonPathNumberValue("@.id")
+//        assertThat(resultSerializedJson).extractingJsonPathNumberValue("@.id").isEqualTo(expectedId)
+//        assertThat(resultSerializedJson).hasJsonPathNumberValue("@.amount")
+//        assertThat(resultSerializedJson).extractingJsonPathNumberValue("@.amount").isEqualTo(expectedAmount)
     }
 
     @Test
     void cashCardDeserializationTest() throws IOException {
         // ARRANGE - Setting up the data that required for the test case
-        CashCard expectedCashCard = new CashCard(99L, 123.45);
+        ClassPathResource resource = new ClassPathResource("static/expected.json");
+        String baseJson = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
         // ACT - Calling a Method/Unit that is being tested
-        String baseJson = """
-                {
-                    "id":99,
-                    "amount":123.45
-                }
-                """;
-        CashCard resultDeserializedCashCard = jsonTester.parseObject(baseJson); // Deserializing JSON
+        CashCard result = jsonTester.parseObject(baseJson); // Deserializing JSON
 
         // ASSERT - Verify that the expected result is correct or not
-        assertThat(resultDeserializedCashCard).isEqualTo(expectedCashCard); // With Junit 5 Assertions.assertEquals(expectedCashCard, resultDeserializedCashCard)
-        assertThat(resultDeserializedCashCard.id()).isEqualTo(expectedCashCard.id());
-        assertThat(resultDeserializedCashCard.amount()).isEqualTo(expectedCashCard.amount());
+        CashCard expectedCashCard = cashCardBase;
+
+        assertThat(result).isEqualTo(expectedCashCard); // With Junit 5 Assertions.assertEquals(expectedCashCard, result)
+        assertThat(result.id()).isEqualTo(expectedCashCard.id());
+        assertThat(result.amount()).isEqualTo(expectedCashCard.amount());
 //        ORIGINAL ASSERTS
-//        assertThat(json.parse(baseJson)).isEqualTo(expectedCashCard)
-//        assertThat(json.parseObject(baseJson).id()).isEqualTo(99L)
-//        assertThat(json.parseObject(baseJson).amount()).isEqualTo(123.45)
+//        assertThat(jsonTester.parse(baseJson)).isEqualTo(expectedCashCard)
+//        assertThat(jsonTester.parseObject(baseJson).id()).isEqualTo(99L)
+//        assertThat(jsonTester.parseObject(baseJson).amount()).isEqualTo(123.45)
     }
 }
