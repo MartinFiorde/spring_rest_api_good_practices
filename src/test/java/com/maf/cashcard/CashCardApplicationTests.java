@@ -35,6 +35,14 @@ class CashCardApplicationTests {
 		Number id = documentContext.read("$.id");
 		assertThat(id).isEqualTo(99);
 	}
+
+	@Test
+	void shouldNotReturnACashCardWithAnUnknownId() {
+		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/1000", String.class);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(response.getBody()).isBlank();
+	}
 }
 
 /*
@@ -75,13 +83,13 @@ al final del log.
 A que se debe esto? te paso la cabecera de las 3 clases:
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class CashCardApplicationTests {...}
+class CashCardApplicationTests
 
 @ContextConfiguration(classes = CashCardJson2Test.Config.class)
-class CashCardJson2Test {...}
+class CashCardJson2Test
 
 @JsonTest
-class CashCardJsonTest {...}
+class CashCardJsonTest
 
 
 
