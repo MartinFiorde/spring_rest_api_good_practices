@@ -14,38 +14,53 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)//This will start our Spring Boot application and make it available for our test to perform requests to it.
 class CashCardApplicationTests {
-	TestRestTemplate restTemplate;//We've asked Spring to inject a test helper that’ll allow us to make HTTP requests to the locally running application.
+    TestRestTemplate restTemplate;//We've asked Spring to inject a test helper that’ll allow us to make HTTP requests to the locally running application.
 
-	@Autowired
-	public CashCardApplicationTests(TestRestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
+    @Autowired
+    public CashCardApplicationTests(TestRestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
-	@Test
-	void shouldReturnACashCardWhenDataIsSaved() {
-		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/99000000000", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99.
+    @Test
+    void shouldReturnACashCardWhenDataIsSaved() {
+        // ARRANGE
+        //H2 automatically fill DB with test/resources/data.sql
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // ACT
+        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards/99000000000", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99.
 
-		DocumentContext documentContext = JsonPath.parse(response.getBody());
-		Number id = documentContext.read("$.id");
-		assertThat(id).isEqualTo(99000000000L);
+        // ASSERT
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotBlank();
 
-		Double amount = documentContext.read("$.amount");
-		assertThat(amount).isEqualTo(123.45);
-	}
+        DocumentContext resultBody = JsonPath.parse(result.getBody());
+        assertThat((Number) resultBody.read("$.id")).isEqualTo(99000000000L);
+        assertThat((Double) resultBody.read("$.amount")).isEqualTo(123.45);
+    }
 
-	@Test
-	void shouldNotReturnACashCardWithAnUnknownId() {
-		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/1000", String.class);
+    @Test
+    void shouldNotReturnACashCardWithAnUnknownId() {
+        // ARRANGE
+        //H2 automatically fill DB with test/resources/data.sql
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-		assertThat(response.getBody()).isBlank();
-	}
+        // ACT
+        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards/1000", String.class);
+
+        // ASSERT
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(result.getBody()).isBlank();
+    }
+
+    @Test
+    void shouldCreateANewCashCard() {
+        CashCard newCashCard = new CashCard(null, 250.00);
+        ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }
 
 /*
