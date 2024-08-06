@@ -9,6 +9,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -57,9 +59,18 @@ class CashCardApplicationTests {
 
     @Test
     void shouldCreateANewCashCard() {
+        // ARRANGE
         CashCard newCashCard = new CashCard(null, 250.00);
-        ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
-        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // ASSERT
+        ResponseEntity<Void> result = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
+
+        // ASSERT
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        URI locationOfNewCashCard = result.getHeaders().getLocation();
+        ResponseEntity<String> resultGet = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+        assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }
 
