@@ -2,9 +2,9 @@ package com.maf.cashcard;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.json.JSONObject;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.context.annotation.Bean;
