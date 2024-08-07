@@ -40,8 +40,8 @@ class CashCardApplicationTests {
         assertThat(result.getBody()).isNotBlank();
 
         DocumentContext resultBody = JsonPath.parse(result.getBody());
-        assertThat((Number) resultBody.read("$.id")).isEqualTo(99000000000L);
-        assertThat((Double) resultBody.read("$.amount")).isEqualTo(123.45);
+        assertThat(resultBody.read("$.id",Long.class)).isEqualTo(99000000000L);
+        assertThat(resultBody.read("$.amount",Double.class)).isEqualTo(123.45);
     }
 
     @Test
@@ -67,10 +67,17 @@ class CashCardApplicationTests {
 
         // ASSERT
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
         URI locationOfNewCashCard = result.getHeaders().getLocation();
+        assertThat(locationOfNewCashCard).isNotNull();
+
         ResponseEntity<String> resultGet = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+        DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
+        String path = locationOfNewCashCard.getPath();
+        Long expectedId = Long.valueOf(path.substring(path.lastIndexOf("/")+1));
+
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultGetBody.read("$.id",Long.class)).isEqualTo(expectedId);
+        assertThat(resultGetBody.read("$.amount",Double.class)).isEqualTo(newCashCard.amount());
     }
 }
 
