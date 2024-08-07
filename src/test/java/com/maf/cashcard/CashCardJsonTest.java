@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CashCardJsonTest {
 
     private final JacksonTester<CashCard> jsonTester;
-    CashCard cashCardBase = new CashCard(99000000000L, 123.45);
+    CashCard cashCardBase = new CashCard(99000000000L, 123.45, "sarah1");
 
     @Autowired
     public CashCardJsonTest(JacksonTester<CashCard> jsonTester) {

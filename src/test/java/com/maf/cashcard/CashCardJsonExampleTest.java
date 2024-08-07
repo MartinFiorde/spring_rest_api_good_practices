@@ -31,9 +31,9 @@ class CashCardJsonExampleTest {
     @BeforeEach
     void setUp() {
         cashCards = Arrays.array(
-                new CashCard(99000000000L, 123.45),
-                new CashCard(100L, 1.00),
-                new CashCard(101L, 150.00));
+                new CashCard(99000000000L, 123.45, "sarah1"),
+                new CashCard(100L, 1.00, "sarah1"),
+                new CashCard(101L, 150.00, "sarah1"));
     }
 
     @Test
@@ -59,13 +59,14 @@ class CashCardJsonExampleTest {
         String expected = """
                 {
                     "id": 99000000000,
-                    "amount": 123.45
+                    "amount": 123.45,
+                    "owner": "sarah1"
                 }
                 """;
         // ACT
         CashCard result = json.parseObject(expected);
         // ASSERT
-        assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45));
+        assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45, "sarah1"));
         assertThat(result.id()).isEqualTo(99000000000L);
         assertThat(result.amount()).isEqualTo(123.45);
     }
@@ -82,9 +83,9 @@ class CashCardJsonExampleTest {
         // ARRANGE
         String baseJson="""
          [
-            { "id": 99000000000, "amount": 123.45 },
-            { "id": 100, "amount": 1.00 },
-            { "id": 101, "amount": 150.00 }
+            { "id": 99000000000, "amount": 123.45 , "owner": "sarah1" },
+            { "id": 100, "amount": 1.00, "owner": "sarah1" },
+            { "id": 101, "amount": 150.00, "owner": "sarah1" }
          ]
          """;
         // ACT

@@ -65,7 +65,7 @@ class CashCardApplicationTests {
     //@DirtiesContext
     void shouldCreateANewCashCard() {
         // ARRANGE
-        CashCard newCashCard = new CashCard(null, 250.00);
+        CashCard newCashCard = new CashCard(null, 250.00, "sarah1");
 
         // ASSERT
         ResponseEntity<Void> result = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
@@ -110,7 +110,7 @@ class CashCardApplicationTests {
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         DocumentContext resultGetBody = JsonPath.parse(result.getBody());
-        int resultLength = resultGetBody.read("$[*]",List.class).size();
+        int resultLength = resultGetBody.read("$[*]", List.class).size();
         assertThat(resultLength).isEqualTo(1);
     }
 
@@ -129,15 +129,15 @@ class CashCardApplicationTests {
 
     @Test
     void shouldReturnASortedPageOfCashCardsWithNoParametersAndUseDefaultValues() {
-        ResponseEntity<String> response = restTemplate.getForEntity("/cashcards", String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards", String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        JSONArray page = documentContext.read("$[*]");
-        assertThat(page).hasSize(3);
+        DocumentContext resultGetBody = JsonPath.parse(result.getBody());
+        int resultLength = ((JSONArray) resultGetBody.read("$[*]")).size();
+        assertThat(resultLength).isEqualTo(3);
 
-        JSONArray amounts = documentContext.read("$..amount");
-        assertThat(amounts).containsExactly(1.00, 123.45, 150.00);
+        JSONArray resultAmounts = resultGetBody.read("$..amount");
+        assertThat(resultAmounts).containsExactly(1.00, 123.45, 150.00);
     }
 }
 
