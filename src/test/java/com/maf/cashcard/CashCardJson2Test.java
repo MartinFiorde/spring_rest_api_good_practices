@@ -52,7 +52,7 @@ class CashCardJson2Test {
         JSONObject resultAsObject = new JSONObject(result.getJson());
 
         // ASSERT
-        File expected = new ClassPathResource("static/expected.json").getFile();
+        File expected = new ClassPathResource("static/simple.json").getFile();
         JSONObject expectedAsObject = new JSONObject(new String(Files.readAllBytes(expected.toPath())));
 
         assertThat(result)
@@ -66,7 +66,7 @@ class CashCardJson2Test {
     @Test
     void testDeserialize() throws IOException {
         // ARRANGE
-        String jsonContent = new String(Files.readAllBytes(new ClassPathResource("static/expected.json").getFile().toPath()));
+        String jsonContent = new String(Files.readAllBytes(new ClassPathResource("static/simple.json").getFile().toPath()));
 
         // ACT
         CashCard result = json.parseObject(jsonContent);

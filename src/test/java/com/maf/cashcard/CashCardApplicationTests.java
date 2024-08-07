@@ -33,7 +33,7 @@ class CashCardApplicationTests {
         //H2 automatically fill DB with test/resources/data.sql
 
         // ACT
-        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards/99000000000", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99.
+        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards/99000000000", String.class);//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99000000000
 
         // ASSERT
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
