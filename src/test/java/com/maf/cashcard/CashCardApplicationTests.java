@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.*;
@@ -61,6 +62,7 @@ class CashCardApplicationTests {
     }
 
     @Test
+    //@DirtiesContext
     void shouldCreateANewCashCard() {
         // ARRANGE
         CashCard newCashCard = new CashCard(null, 250.00);
@@ -79,8 +81,28 @@ class CashCardApplicationTests {
         Long expectedId = Long.valueOf(path.substring(path.lastIndexOf("/") + 1));
 
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultGetBody.read("$.id", Long.class)).isEqualTo(expectedId);
-        assertThat(resultGetBody.read("$.amount", Double.class)).isEqualTo(newCashCard.amount());
+        Long resultId = resultGetBody.read("$.id", Long.class);
+        assertThat(resultId).isEqualTo(expectedId);
+        Double resultAmount = resultGetBody.read("$.amount", Double.class);
+        assertThat(resultAmount).isEqualTo(newCashCard.amount());
+    }
+
+    @Test
+    void shouldReturnAllCashCardsWhenListIsRequested() {
+        ResponseEntity<String> result = restTemplate.getForEntity("/cashcards", String.class);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        DocumentContext resultGetBody = JsonPath.parse(result.getBody());
+        int cashCardCount = resultGetBody.read("$.length()");
+        assertThat(cashCardCount).isEqualTo(3);
+
+        List<?> ids = resultGetBody.read("$..id", List.class);// Originall JSONArray fails because low numbers are interpreted as int
+        List<Long> convertedIds = ids.stream().map(x -> ((Number) x).longValue()).toList();
+        assertThat(convertedIds).containsExactlyInAnyOrder(99000000000L, 100L, 101L);
+
+        JSONArray amounts = resultGetBody.read("$..amount");
+        assertThat(amounts).containsExactlyInAnyOrder(123.45, 1.0, 150.00);
+    }
     }
 }
 
@@ -93,21 +115,7 @@ CashCardApplicationTests > shouldReturnACashCardWhenDataIsSaved() PASSED
 CashCardApplicationTests > contextLoads() PASSED
 CashCardJson2Test > testSerialize() PASSED
 CashCardJson2Test > testDeserialize() PASSED
-2024-08-06T12:32:55.141-03:00  INFO 4244 --- [cashcard] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.maf.cashcard.CashCardJsonTest]: CashCardJsonTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2024-08-06T12:32:55.168-03:00  INFO 4244 --- [cashcard] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.maf.cashcard.CashCardApplication for test class com.maf.cashcard.CashCardJsonTest
-
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _ | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
-
- :: Spring Boot ::                (v3.3.2)
-
-2024-08-06T12:32:55.204-03:00  INFO 4244 --- [cashcard] [    Test worker] com.maf.cashcard.CashCardJsonTest        : Starting CashCardJsonTest using Java 21.0.3 with PID 4244 (started by Martin F - PC Desk in C:\Users\Martin F - PC Desk\Desktop\cashcard)
-2024-08-06T12:32:55.204-03:00  INFO 4244 --- [cashcard] [    Test worker] com.maf.cashcard.CashCardJsonTest        : No active profile set, falling back to 1 default profile: "default"
-2024-08-06T12:32:55.324-03:00  INFO 4244 --- [cashcard] [    Test worker] com.maf.cashcard.CashCardJsonTest        : Started CashCardJsonTest in 0.153 seconds (process running for 4.769)
+<SPRING LOGO AND INFO TAGS>
 CashCardJsonTest > cashCardSerializationTest() PASSED
 CashCardJsonTest > cashCardDeserializationTest() PASSED
 BUILD SUCCESSFUL in 7s
@@ -117,9 +125,7 @@ BUILD SUCCESSFUL in 7s
 
 se puede ver que los resultados de los tests contenidos en la clase CashCardApplicationTests figuran al
 principio, pero los resultados de los tests contenidos en la clase CashCardJson2Test se muestran casi
-al final del log.
-
-A que se debe esto? te paso la cabecera de las 3 clases:
+al final del log. A que se debe esto? te paso la cabecera de las 3 clases:
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CashCardApplicationTests
@@ -130,9 +136,7 @@ class CashCardJson2Test
 @JsonTest
 class CashCardJsonTest
 
-
-
-
+--------------------------------------------
 
 La diferencia en el orden de ejecución y en el registro de los resultados de tus pruebas se debe a cómo JUnit
 maneja las pruebas y sus configuraciones. Aquí te explico los detalles:

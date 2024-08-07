@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -30,7 +32,7 @@ class CashCardJsonExampleTest {
     void setUp() {
         cashCards = Arrays.array(
                 new CashCard(99000000000L, 123.45),
-                new CashCard(100L, 100.00),
+                new CashCard(100L, 1.00),
                 new CashCard(101L, 150.00));
     }
 
@@ -66,5 +68,28 @@ class CashCardJsonExampleTest {
         assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45));
         assertThat(result.id()).isEqualTo(99000000000L);
         assertThat(result.amount()).isEqualTo(123.45);
+    }
+
+    @Test
+    void cashCardListSerializationTest() throws IOException {
+        File expected = new ClassPathResource("static/list.json").getFile();
+        JsonContent<CashCard[]> result = jsonList.write(cashCards);
+        assertThat(result).isStrictlyEqualToJson(expected);
+    }
+
+    @Test
+    void cashCardListDeserializationTest() throws IOException {
+        // ARRANGE
+        String baseJson="""
+         [
+            { "id": 99000000000, "amount": 123.45 },
+            { "id": 100, "amount": 1.00 },
+            { "id": 101, "amount": 150.00 }
+         ]
+         """;
+        // ACT
+        CashCard[] result = jsonList.parseObject(baseJson);
+        // ASSERT
+        assertThat(result).isEqualTo(cashCards);
     }
 }
