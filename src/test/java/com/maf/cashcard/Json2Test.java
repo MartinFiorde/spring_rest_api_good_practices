@@ -19,8 +19,8 @@ import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 
 //Same tests as CashCardJsonTest, but configuring manually the @JsonTest annotation and using JSONObject for more clear asserts
-@ContextConfiguration(classes = CashCardJson2Test.Config.class)
-class CashCardJson2Test {
+@ContextConfiguration(classes = Json2Test.Config.class)
+class Json2Test {
 
     @SuppressWarnings("unused")
     private JacksonTester<CashCard> json;

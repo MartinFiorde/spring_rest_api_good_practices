@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-class CashCardJsonExampleTest {
+class JsonExampleTest {
 
     @Autowired
     private JacksonTester<CashCard> json;
