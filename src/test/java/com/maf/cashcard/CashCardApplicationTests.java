@@ -2,19 +2,22 @@ package com.maf.cashcard;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import net.minidev.json.JSONArray;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.springframework.test.annotation.DirtiesContext.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)//This will start our Spring Boot application and make it available for our test to perform requests to it.
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class CashCardApplicationTests {
     TestRestTemplate restTemplate;//We've asked Spring to inject a test helper that’ll allow us to make HTTP requests to the locally running application.
 
@@ -40,8 +43,8 @@ class CashCardApplicationTests {
         assertThat(result.getBody()).isNotBlank();
 
         DocumentContext resultBody = JsonPath.parse(result.getBody());
-        assertThat(resultBody.read("$.id",Long.class)).isEqualTo(99000000000L);
-        assertThat(resultBody.read("$.amount",Double.class)).isEqualTo(123.45);
+        assertThat(resultBody.read("$.id", Long.class)).isEqualTo(99000000000L);
+        assertThat(resultBody.read("$.amount", Double.class)).isEqualTo(123.45);
     }
 
     @Test
@@ -73,11 +76,11 @@ class CashCardApplicationTests {
         ResponseEntity<String> resultGet = restTemplate.getForEntity(locationOfNewCashCard, String.class);
         DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
         String path = locationOfNewCashCard.getPath();
-        Long expectedId = Long.valueOf(path.substring(path.lastIndexOf("/")+1));
+        Long expectedId = Long.valueOf(path.substring(path.lastIndexOf("/") + 1));
 
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultGetBody.read("$.id",Long.class)).isEqualTo(expectedId);
-        assertThat(resultGetBody.read("$.amount",Double.class)).isEqualTo(newCashCard.amount());
+        assertThat(resultGetBody.read("$.id", Long.class)).isEqualTo(expectedId);
+        assertThat(resultGetBody.read("$.amount", Double.class)).isEqualTo(newCashCard.amount());
     }
 }
 

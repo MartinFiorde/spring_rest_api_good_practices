@@ -33,7 +33,7 @@ class CashCardJsonTest {
         JsonContent<CashCard> result = jsonTester.write(cashCard);
 
         // ASSERT - Verify that the expected result is correct or not
-        ClassPathResource resource = new ClassPathResource("static/simple.json");
+        ClassPathResource resource = new ClassPathResource("static/single.json");
         String expected = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
         assertThat(result)
@@ -54,7 +54,7 @@ class CashCardJsonTest {
     @Test
     void cashCardDeserializationTest() throws IOException {
         // ARRANGE - Setting up the data that required for the test case
-        ClassPathResource resource = new ClassPathResource("static/simple.json");
+        ClassPathResource resource = new ClassPathResource("static/single.json");
         String baseJson = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
         // ACT - Calling a Method/Unit that is being tested
