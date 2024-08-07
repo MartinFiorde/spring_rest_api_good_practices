@@ -14,13 +14,13 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-class CashCardJsonTest {
+class CashCardJsonExampleTest {
 
     private final JacksonTester<CashCard> jsonTester;
     CashCard cashCardBase = new CashCard(99000000000L, 123.45);
 
     @Autowired
-    public CashCardJsonTest(JacksonTester<CashCard> jsonTester) {
+    public CashCardJsonExampleTest(JacksonTester<CashCard> jsonTester) {
         this.jsonTester = jsonTester;
     }
 
