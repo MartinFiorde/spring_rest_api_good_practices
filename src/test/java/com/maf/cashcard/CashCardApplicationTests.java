@@ -267,6 +267,11 @@ class CashCardApplicationTests {
                 .withBasicAuth("sarah1", "abc123")
                 .exchange("/cashcards/102", HttpMethod.DELETE, null, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        ResponseEntity<String> resultGet = restTemplate
+                .withBasicAuth("kumar2", "xyz789")
+                .getForEntity("/cashcards/102", String.class);
+        assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }
 
