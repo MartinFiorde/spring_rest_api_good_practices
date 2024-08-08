@@ -67,25 +67,18 @@ class CashCardController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCashCard(@PathVariable Long id, Principal principal) {
-//        SOFT DELETE
         CashCard cashCardSearched = cashCardRepository.findByIdAndOwnerAndIsActive(id, principal.getName(), true);
         if (cashCardSearched == null) return ResponseEntity.notFound().build();
         auditTrailRepository.findByObjectTypeAndObjectId(CashCard.class.toString(), id);
         CashCard cashCardDeleted = new CashCard(cashCardSearched.id(), cashCardSearched.amount(), cashCardSearched.owner(), false);
-        cashCardRepository.save(cashCardDeleted);
+        cashCardRepository.save(cashCardDeleted); // SOFT DELETE
+        //cashCardRepository.deleteById(id); // HARD DELETE
         auditTrailRepository.save(new AuditTrail(null, CashCard.class.toString(), id));
         return ResponseEntity.noContent().build();
-
-//        HARD DELETE
-//        boolean idIsInvalid = !cashCardRepository.existsByIdAndOwnerAndIsActive(id, principal.getName(),true)
-//        if idIsInvalid return ResponseEntity.notFound().build()
-//        cashCardRepository.deleteById(id)
-//        auditTrailRepository.save(new AuditTrail(null, CashCard.class.toString(), id))
-//        return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/audittrail/{id}")
-    public ResponseEntity<AuditTrail> findAuditTrail(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<AuditTrail> findAuditTrail(@PathVariable Long id) {
         AuditTrail auditTrail = auditTrailRepository.findByObjectTypeAndObjectId(CashCard.class.toString(), id);
         System.out.println("MAF: "+auditTrail);
         return auditTrail != null ? ResponseEntity.ok(auditTrail) : ResponseEntity.notFound().build();

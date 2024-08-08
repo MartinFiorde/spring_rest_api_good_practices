@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 interface CashCardRepository extends CrudRepository<CashCard, Long>, PagingAndSortingRepository<CashCard, Long> {
     CashCard findByIdAndOwnerAndIsActive(Long id, String owner, Boolean isActive);
     Page<CashCard> findByOwnerAndIsActive(String owner, Boolean isActive, PageRequest pageRequest);
-    boolean existsByIdAndOwnerAndIsActive(Long id, String owner, Boolean isActive);
+    //boolean existsByIdAndOwnerAndIsActive(Long id, String owner, Boolean isActive); // FOR OLD HARD DELETE METHOD
 }
