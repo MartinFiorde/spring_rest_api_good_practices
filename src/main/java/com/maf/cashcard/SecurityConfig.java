@@ -24,7 +24,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/cashcards/**")
-                        .authenticated())
+                        //.authenticated()) // SECOND ITERATION: only check authenticacion, no authorization
+                        .hasRole("CARD-OWNER")) // THIRD ITERATION: enable role  authorization
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable); //IDEM: csrf -> csrf.disable()
         return http.build();
@@ -41,8 +42,14 @@ public class SecurityConfig {
         UserDetails sarah = users
                 .username("sarah1")
                 .password(passwordEncoder.encode("abc123"))
-                .roles() // No roles for now
+                //.roles() // SECOND ITERATION: no roles used
+                .roles("CARD-OWNER") // THIRD ITERATION: new role
                 .build();
-        return new InMemoryUserDetailsManager(sarah);
+        UserDetails hankOwnsNoCards = users
+                .username("hank-owns-no-cards")
+                .password(passwordEncoder.encode("qrs456"))
+                .roles("NON-OWNER") // THIRD ITERATION: new role
+                .build();
+        return new InMemoryUserDetailsManager(sarah, hankOwnsNoCards);
     }
 }
