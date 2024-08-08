@@ -2,10 +2,9 @@ package com.maf.cashcard;
 
 import org.springframework.data.annotation.Id;
 
-record CashCard(
+record AuditTrail(
         @Id Long id,
-        Double amount,
-        String owner,
-        Boolean isActive
+        String objectType,
+        Long objectId
 ) {
 }

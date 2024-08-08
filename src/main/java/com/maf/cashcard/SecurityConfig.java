@@ -16,7 +16,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    static final String CARD_OWNER = "CARD-OWNER";
+    static final String ROLE_CARD_OWNER = "CARD-OWNER";
+    static final String ROLE_ADMIN = "ADMIN";
+    static final String ROLE_NONE = "NON-OWNER";
+    static final String TEST_PASS = "admin123";
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,7 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/cashcards/**")
                         //.authenticated()) // SECOND ITERATION: only check authenticacion, no authorization
-                        .hasRole(CARD_OWNER)) // THIRD ITERATION: enable Role-Based Access Control (RBAC)
+                        .hasRole(ROLE_CARD_OWNER) // THIRD ITERATION: enable Role-Based Access Control (RBAC)
+                        .requestMatchers("/cashcards/audittrail/**").hasRole(ROLE_ADMIN))
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable); //IDEM: csrf -> csrf.disable()
         return http.build();
@@ -43,20 +47,25 @@ public class SecurityConfig {
         User.UserBuilder users = User.builder();
         UserDetails sarah = users
                 .username("sarah1")
-                .password(passwordEncoder.encode("abc123"))
+                .password(passwordEncoder.encode(TEST_PASS))
                 //.roles() // SECOND ITERATION: no roles used
-                .roles(CARD_OWNER) // THIRD ITERATION: new role
+                .roles(ROLE_CARD_OWNER) // THIRD ITERATION: new role
                 .build();
         UserDetails kumar = users
                 .username("kumar2")
-                .password(passwordEncoder.encode("xyz789"))
-                .roles(CARD_OWNER)
+                .password(passwordEncoder.encode(TEST_PASS))
+                .roles(ROLE_CARD_OWNER)
+                .build();
+        UserDetails admin = users
+                .username("admin3")
+                .password(passwordEncoder.encode(TEST_PASS))
+                .roles(ROLE_ADMIN)
                 .build();
         UserDetails hankOwnsNoCards = users
                 .username("hank-owns-no-cards")
-                .password(passwordEncoder.encode("qrs890"))
-                .roles("NON-OWNER") // THIRD ITERATION: new role
+                .password(passwordEncoder.encode(TEST_PASS))
+                .roles(ROLE_NONE) // THIRD ITERATION: new role
                 .build();
-        return new InMemoryUserDetailsManager(sarah, kumar, hankOwnsNoCards);
+        return new InMemoryUserDetailsManager(sarah, kumar, admin, hankOwnsNoCards);
     }
 }
