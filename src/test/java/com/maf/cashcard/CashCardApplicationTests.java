@@ -176,6 +176,14 @@ class CashCardApplicationTests {
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
+
+    @Test
+    void shouldNotAllowAccessToCashCardsTheyDoNotOwn() {
+        ResponseEntity<String> result = restTemplate
+                .withBasicAuth("sarah1", "abc123")
+                .getForEntity("/cashcards/102", String.class); // kumar2's data
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 }
 
 /*

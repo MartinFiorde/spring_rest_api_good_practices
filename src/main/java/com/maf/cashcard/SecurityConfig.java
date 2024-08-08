@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/cashcards/**")
                         //.authenticated()) // SECOND ITERATION: only check authenticacion, no authorization
-                        .hasRole("CARD-OWNER")) // THIRD ITERATION: enable role  authorization
+                        .hasRole("CARD-OWNER")) // THIRD ITERATION: enable Role-Based Access Control (RBAC)
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable); //IDEM: csrf -> csrf.disable()
         return http.build();
