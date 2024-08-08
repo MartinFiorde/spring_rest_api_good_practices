@@ -60,7 +60,7 @@ class CashCardController {
         if (requestedId == null) return ResponseEntity.badRequest().build();
         CashCard cashCardSearched = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
         if (cashCardSearched == null) return ResponseEntity.notFound().build();
-        CashCard cashCardUpdated = new CashCard(cashCardSearched.id(),cashCardChanged.amount(),cashCardSearched.owner());
+        CashCard cashCardUpdated = new CashCard(cashCardSearched.id(), cashCardChanged.amount(), cashCardSearched.owner());
         cashCardRepository.save(cashCardUpdated);
         return ResponseEntity.noContent().build();
     }
