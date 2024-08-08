@@ -49,6 +49,7 @@ class CashCardApplicationTests {
         DocumentContext resultBody = JsonPath.parse(result.getBody());
         assertThat(resultBody.read("$.id", Long.class)).isEqualTo(99000000000L);
         assertThat(resultBody.read("$.amount", Double.class)).isEqualTo(123.45);
+        assertThat(resultBody.read("$.owner",String.class)).isEqualTo("sarah1");
     }
 
     @Test
@@ -173,7 +174,7 @@ class CashCardApplicationTests {
     @Test
     void shouldRejectUsersWhoAreNotCardOwners() {
         ResponseEntity<String> response = restTemplate
-                .withBasicAuth("hank-owns-no-cards", "qrs456")
+                .withBasicAuth("hank-owns-no-cards", "qrs890")
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -204,8 +205,10 @@ class CashCardApplicationTests {
         DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
         Number id = resultGetBody.read("$.id");
         Double amount = resultGetBody.read("$.amount");
+        String owner = resultGetBody.read("$.owner");
         assertThat(id).isEqualTo(99000000000L);
         assertThat(amount).isEqualTo(19.99);
+        assertThat(owner).isEqualTo("sarah1");
     }
 
     @Test
@@ -276,47 +279,18 @@ class CashCardApplicationTests {
 }
 
 /*
-
-al ejecutar los tests de mi aplicación Java Spring, se me genera este log:
-
-> Task :test
-CashCardApplicationTests > shouldReturnACashCardWhenDataIsSaved() PASSED
-CashCardApplicationTests > contextLoads() PASSED
-CashCardJson2Test > testSerialize() PASSED
-CashCardJson2Test > testDeserialize() PASSED
-<SPRING LOGO AND INFO TAGS>
-CashCardJsonTest > cashCardSerializationTest() PASSED
-CashCardJsonTest > cashCardDeserializationTest() PASSED
-BUILD SUCCESSFUL in 7s
-5 actionable tasks: 2 executed, 3 up-to-date
-12:32:56: Execution finished 'test'.
-
-
-se puede ver que los resultados de los tests contenidos en la clase CashCardApplicationTests figuran al
-principio, pero los resultados de los tests contenidos en la clase CashCardJson2Test se muestran casi
-al final del log. A que se debe esto? te paso la cabecera de las 3 clases:
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class CashCardApplicationTests
-
-@ContextConfiguration(classes = CashCardJson2Test.Config.class)
-class CashCardJson2Test
-
-@JsonTest
-class CashCardJsonTest
-
+al ejecutar tests, en el log se ven los resultados de los test desordenados. A que se debe esto?
 --------------------------------------------
-
 La diferencia en el orden de ejecución y en el registro de los resultados de tus pruebas se debe a cómo JUnit
 maneja las pruebas y sus configuraciones. Aquí te explico los detalles:
 
-    CashCardApplicationTests: Está anotada con @SpringBootTest, que inicia un contexto completo de Spring Boot.
-    Este tipo de prueba se ejecuta al principio porque generalmente necesita un tiempo de configuración más largo,
-    ya que se carga tod0 el contexto de la aplicación.
+    CashCardApplicationTests: Usa @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT),
+    que inicia un contexto completo de Spring Boot. Este tipo de prueba se ejecuta al principio porque
+    generalmente necesita un tiempo de configuración más largo, ya que se carga tod0 el contexto de la aplicación.
 
-    CashCardJson2Test: Usa @ContextConfiguration para definir un contexto de prueba específico. Esto puede
-    involucrar menos configuración comparado con @SpringBootTest, y puede ejecutarse en un orden diferente
-    dependiendo de cómo se configuren las tareas en el proyecto.
+    CashCardJson2Test: Usa @ContextConfiguration(classes = CashCardJson2Test.Config.class) para definir un
+    contexto de prueba específico. Esto puede involucrar menos configuración comparado con @SpringBootTest,
+    y puede ejecutarse en un orden diferente dependiendo de cómo se configuren las tareas en el proyecto.
 
     CashCardJsonTest: Está anotada con @JsonTest, que está diseñada para pruebas que se centran en la
     serialización y deserialización de JSON. Esta anotación carga solo los componentes necesarios para
@@ -329,5 +303,4 @@ organiza y ejecuta las pruebas.
 Si el orden de ejecución es importante para ti, puedes intentar ajustar el orden con configuraciones adicionales,
 pero generalmente, el comportamiento que estás viendo es normal dado el tipo de prueba y la configuración
 de Spring Boot.
-
  */

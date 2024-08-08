@@ -46,10 +46,12 @@ class JsonExampleTest {
         assertThat(result)
                 .isStrictlyEqualToJson(expected)
                 .hasJsonPathNumberValue("@.id")
-                .hasJsonPathNumberValue("@.amount");
+                .hasJsonPathNumberValue("@.amount")
+                .hasJsonPathNumberValue("@.owner");
         assertThat(result.getJson())
                 .contains("\"id\":" + cashCard.id())
-                .contains("\"amount\":" + cashCard.amount());
+                .contains("\"amount\":" + cashCard.amount())
+                .contains("\"owner\":" + cashCard.owner());
     }
 
     @Test
@@ -68,6 +70,7 @@ class JsonExampleTest {
         assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45, "sarah1"));
         assertThat(result.id()).isEqualTo(99000000000L);
         assertThat(result.amount()).isEqualTo(123.45);
+        assertThat(result.owner()).isEqualTo("sarah1");
     }
 
     @Test
