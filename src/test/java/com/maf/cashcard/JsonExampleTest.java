@@ -30,9 +30,9 @@ class JsonExampleTest {
     @BeforeEach
     void setUp() {
         cashCards = Arrays.array(
-                new CashCard(99000000000L, 123.45, "sarah1"),
-                new CashCard(100L, 1.00, "sarah1"),
-                new CashCard(101L, 150.00, "sarah1"));
+                new CashCard(99000000000L, 123.45, "sarah1", true),
+                new CashCard(100L, 1.00, "sarah1", true),
+                new CashCard(101L, 150.00, "sarah1", true));
     }
 
     @Test
@@ -42,16 +42,17 @@ class JsonExampleTest {
         String expected = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
         JsonContent<CashCard> result = json.write(cashCard);
-
+        System.out.println("MAF: "+result.getJson().toString());
         assertThat(result)
                 .isStrictlyEqualToJson(expected)
                 .hasJsonPathNumberValue("@.id")
                 .hasJsonPathNumberValue("@.amount")
-                .hasJsonPathNumberValue("@.owner");
+                .hasJsonPathStringValue("@.owner");
         assertThat(result.getJson())
                 .contains("\"id\":" + cashCard.id())
                 .contains("\"amount\":" + cashCard.amount())
-                .contains("\"owner\":" + cashCard.owner());
+                .contains("\"owner\":\"" + cashCard.owner()+"\"")
+                .contains("\"isActive\":" + cashCard.isActive());
     }
 
     @Test
@@ -61,13 +62,14 @@ class JsonExampleTest {
                 {
                     "id": 99000000000,
                     "amount": 123.45,
-                    "owner": "sarah1"
+                    "owner": "sarah1",
+                    "isActive": true
                 }
                 """;
         // ACT
         CashCard result = json.parseObject(expected);
         // ASSERT
-        assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45, "sarah1"));
+        assertThat(result).isEqualTo(new CashCard(99000000000L, 123.45, "sarah1", true));
         assertThat(result.id()).isEqualTo(99000000000L);
         assertThat(result.amount()).isEqualTo(123.45);
         assertThat(result.owner()).isEqualTo("sarah1");
@@ -85,9 +87,9 @@ class JsonExampleTest {
         // ARRANGE
         String baseJson="""
          [
-            { "id": 99000000000, "amount": 123.45 , "owner": "sarah1" },
-            { "id": 100, "amount": 1.00, "owner": "sarah1" },
-            { "id": 101, "amount": 150.00, "owner": "sarah1" }
+            { "id": 99000000000, "amount": 123.45 , "owner": "sarah1", "isActive": true },
+            { "id": 100, "amount": 1.00, "owner": "sarah1", "isActive": true },
+            { "id": 101, "amount": 150.00, "owner": "sarah1", "isActive": true }
          ]
          """;
         // ACT

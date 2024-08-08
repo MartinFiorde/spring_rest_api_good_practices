@@ -44,7 +44,7 @@ class CashCardController {
 
     @PostMapping
     public ResponseEntity<Void> createCashCard(@RequestBody CashCard newCashCardRequest, UriComponentsBuilder ucb, Principal principal) {
-        CashCard cashCardToSave = new CashCard(null, newCashCardRequest.amount(), principal.getName());
+        CashCard cashCardToSave = new CashCard(null, newCashCardRequest.amount(), principal.getName(), true);
         CashCard savedCashCard = cashCardRepository.save(cashCardToSave);
         URI locationOfNewCashCard = ucb
                 .path("cashcards/{id}")
@@ -57,7 +57,7 @@ class CashCardController {
     public ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardChanged, Principal principal) {
         CashCard cashCardSearched = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
         if (cashCardSearched == null) return ResponseEntity.notFound().build();
-        CashCard cashCardUpdated = new CashCard(cashCardSearched.id(), cashCardChanged.amount(), cashCardSearched.owner());
+        CashCard cashCardUpdated = new CashCard(cashCardSearched.id(), cashCardChanged.amount(), cashCardSearched.owner(), true);
         cashCardRepository.save(cashCardUpdated);
         return ResponseEntity.noContent().build();
     }

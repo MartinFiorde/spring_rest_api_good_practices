@@ -71,7 +71,7 @@ class CashCardApplicationTests {
     @DirtiesContext
     void shouldCreateANewCashCard() {
         // ARRANGE
-        CashCard newCashCard = new CashCard(null, 250.00, null);
+        CashCard newCashCard = new CashCard(null, 250.00, null, true);
 
         // ASSERT
         ResponseEntity<Void> result = restTemplate
@@ -190,7 +190,7 @@ class CashCardApplicationTests {
     @Test
     @DirtiesContext
     void shouldUpdateAnExistingCashCard() {
-        CashCard cashCardUpdate = new CashCard(null, 19.99, null);
+        CashCard cashCardUpdate = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(cashCardUpdate);
         ResponseEntity<Void> result = restTemplate
                 .withBasicAuth("sarah1", "abc123")
@@ -213,7 +213,7 @@ class CashCardApplicationTests {
 
     @Test
     void shouldNotUpdateACashCardThatDoesNotExist() {
-        CashCard unknownCard = new CashCard(null, 19.99, null);
+        CashCard unknownCard = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
         ResponseEntity<Void> response = restTemplate
                 .withBasicAuth("sarah1", "abc123")
@@ -223,7 +223,7 @@ class CashCardApplicationTests {
 
     @Test
     void shouldNotUpdateACashCardThatIsOwnedBySomeoneElse() {
-        CashCard kumarsCard = new CashCard(null, 333.33, null);
+        CashCard kumarsCard = new CashCard(null, 333.33, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(kumarsCard);
         ResponseEntity<Void> response = restTemplate
                 .withBasicAuth("sarah1", "abc123")
@@ -233,7 +233,7 @@ class CashCardApplicationTests {
 
     @Test
     void shouldNotUpdateACashCardInvalidId() {
-        CashCard unknownCard = new CashCard(null, 19.99, null);
+        CashCard unknownCard = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
         ResponseEntity<Void> result = restTemplate
                 .withBasicAuth("sarah1", "abc123")
