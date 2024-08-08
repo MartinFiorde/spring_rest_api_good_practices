@@ -61,4 +61,12 @@ class CashCardController {
         cashCardRepository.save(cashCardUpdated);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCashCard(@PathVariable Long id, Principal principal) {
+        boolean idIsInvalid = !cashCardRepository.existsByIdAndOwner(id, principal.getName());
+        if (idIsInvalid) return ResponseEntity.notFound().build();
+        cashCardRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
