@@ -18,16 +18,19 @@ import java.util.List;
 class CashCardController {
 
     private final CashCardRepository cashCardRepository;
+    private final AuditTrailRepository auditTrailRepository;
 
     @Autowired
-    private CashCardController(CashCardRepository cashCardRepository) {
+    private CashCardController(CashCardRepository cashCardRepository, AuditTrailRepository auditTrailRepository) {
         this.cashCardRepository = cashCardRepository;
+        this.auditTrailRepository = auditTrailRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<CashCard>> findAll(Pageable pageable, Principal principal) {
-        Page<CashCard> page = cashCardRepository.findByOwner(
+        Page<CashCard> page = cashCardRepository.findByOwnerAndIsActive(
                 principal.getName(),
+                true,
                 PageRequest.of(
                         pageable.getPageNumber(),
                         pageable.getPageSize(),
@@ -38,7 +41,7 @@ class CashCardController {
 
     @GetMapping("/{requestedId}")
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
-        CashCard cashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        CashCard cashCard = cashCardRepository.findByIdAndOwnerAndIsActive(requestedId, principal.getName(), true);
         return cashCard != null ? ResponseEntity.ok(cashCard) : ResponseEntity.notFound().build();
     }
 
@@ -55,7 +58,7 @@ class CashCardController {
 
     @PutMapping("/{requestedId}")
     public ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardChanged, Principal principal) {
-        CashCard cashCardSearched = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        CashCard cashCardSearched = cashCardRepository.findByIdAndOwnerAndIsActive(requestedId, principal.getName(), true);
         if (cashCardSearched == null) return ResponseEntity.notFound().build();
         CashCard cashCardUpdated = new CashCard(cashCardSearched.id(), cashCardChanged.amount(), cashCardSearched.owner(), true);
         cashCardRepository.save(cashCardUpdated);
@@ -64,9 +67,27 @@ class CashCardController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCashCard(@PathVariable Long id, Principal principal) {
-        boolean idIsInvalid = !cashCardRepository.existsByIdAndOwner(id, principal.getName());
-        if (idIsInvalid) return ResponseEntity.notFound().build();
-        cashCardRepository.deleteById(id);
+//        SOFT DELETE
+        CashCard cashCardSearched = cashCardRepository.findByIdAndOwnerAndIsActive(id, principal.getName(), true);
+        if (cashCardSearched == null) return ResponseEntity.notFound().build();
+        auditTrailRepository.findByObjectTypeAndObjectId(CashCard.class.toString(), id);
+        CashCard cashCardDeleted = new CashCard(cashCardSearched.id(), cashCardSearched.amount(), cashCardSearched.owner(), false);
+        cashCardRepository.save(cashCardDeleted);
+        auditTrailRepository.save(new AuditTrail(null, CashCard.class.toString(), id));
         return ResponseEntity.noContent().build();
+
+//        HARD DELETE
+//        boolean idIsInvalid = !cashCardRepository.existsByIdAndOwnerAndIsActive(id, principal.getName(),true)
+//        if idIsInvalid return ResponseEntity.notFound().build()
+//        cashCardRepository.deleteById(id)
+//        auditTrailRepository.save(new AuditTrail(null, CashCard.class.toString(), id))
+//        return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/audittrail/{id}")
+    public ResponseEntity<AuditTrail> findAuditTrail(@PathVariable Long id, Principal principal) {
+        AuditTrail auditTrail = auditTrailRepository.findByObjectTypeAndObjectId(CashCard.class.toString(), id);
+        System.out.println("MAF: "+auditTrail);
+        return auditTrail != null ? ResponseEntity.ok(auditTrail) : ResponseEntity.notFound().build();
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 interface CashCardRepository extends CrudRepository<CashCard, Long>, PagingAndSortingRepository<CashCard, Long> {
-    CashCard findByIdAndOwner(Long id, String owner);
-    Page<CashCard> findByOwner(String owner, PageRequest pageRequest);
-    boolean existsByIdAndOwner(Long id, String owner);
+    CashCard findByIdAndOwnerAndIsActive(Long id, String owner, Boolean isActive);
+    Page<CashCard> findByOwnerAndIsActive(String owner, Boolean isActive, PageRequest pageRequest);
+    boolean existsByIdAndOwnerAndIsActive(Long id, String owner, Boolean isActive);
 }

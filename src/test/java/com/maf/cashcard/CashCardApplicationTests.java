@@ -253,6 +253,11 @@ class CashCardApplicationTests {
                 .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        ResponseEntity<String> resultAuditTrail = restTemplate
+                .withBasicAuth("sarah1", "admin123")
+                .getForEntity("/cashcards/audittrail/99000000000", String.class);
+        assertThat(resultAuditTrail.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
