@@ -39,7 +39,7 @@ class CashCardApplicationTests {
 
         // ACT
         ResponseEntity<String> result = restTemplate//We use restTemplate to make an HTTP GET request to our application endpoint /cashcards/99000000000
-                .withBasicAuth("sarah1", "abc123")//Simple auth config
+                .withBasicAuth("sarah1", "admin123")//Simple auth config
                 .getForEntity("/cashcards/99000000000", String.class);
 
         // ASSERT
@@ -49,6 +49,7 @@ class CashCardApplicationTests {
         DocumentContext resultBody = JsonPath.parse(result.getBody());
         assertThat(resultBody.read("$.id", Long.class)).isEqualTo(99000000000L);
         assertThat(resultBody.read("$.amount", Double.class)).isEqualTo(123.45);
+        assertThat(resultBody.read("$.owner",String.class)).isEqualTo("sarah1");
     }
 
     @Test
@@ -58,7 +59,7 @@ class CashCardApplicationTests {
 
         // ACT
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards/1000", String.class);
 
         // ASSERT
@@ -70,11 +71,11 @@ class CashCardApplicationTests {
     @DirtiesContext
     void shouldCreateANewCashCard() {
         // ARRANGE
-        CashCard newCashCard = new CashCard(null, 250.00, null);
+        CashCard newCashCard = new CashCard(null, 250.00, null, true);
 
         // ASSERT
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .postForEntity("/cashcards", newCashCard, Void.class);
 
         // ASSERT
@@ -83,7 +84,7 @@ class CashCardApplicationTests {
         assertThat(locationOfNewCashCard).isNotNull();
 
         ResponseEntity<String> resultGet = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity(locationOfNewCashCard, String.class);
         DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
         String path = locationOfNewCashCard.getPath();
@@ -99,7 +100,7 @@ class CashCardApplicationTests {
     @Test
     void shouldReturnAllCashCardsWhenListIsRequested() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards", String.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -118,7 +119,7 @@ class CashCardApplicationTests {
     @Test
     void shouldReturnAPageOfCashCards() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards?page=0&size=1", String.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -130,7 +131,7 @@ class CashCardApplicationTests {
     @Test
     void shouldReturnASortedPageOfCashCards() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards?page=0&size=1&sort=amount,desc", String.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -145,7 +146,7 @@ class CashCardApplicationTests {
     @Test
     void shouldReturnASortedPageOfCashCardsWithNoParametersAndUseDefaultValues() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards", String.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -160,7 +161,7 @@ class CashCardApplicationTests {
     @Test
     void shouldNotReturnACashCardWhenUsingBadCredentials() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("BAD-USER", "abc123")
+                .withBasicAuth("BAD-USER", "admin123")
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 
@@ -173,7 +174,7 @@ class CashCardApplicationTests {
     @Test
     void shouldRejectUsersWhoAreNotCardOwners() {
         ResponseEntity<String> response = restTemplate
-                .withBasicAuth("hank-owns-no-cards", "qrs456")
+                .withBasicAuth("hank-owns-no-cards", "admin123")
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -181,7 +182,7 @@ class CashCardApplicationTests {
     @Test
     void shouldNotAllowAccessToCashCardsTheyDoNotOwn() {
         ResponseEntity<String> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards/102", String.class); // kumar2's data
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -189,51 +190,53 @@ class CashCardApplicationTests {
     @Test
     @DirtiesContext
     void shouldUpdateAnExistingCashCard() {
-        CashCard cashCardUpdate = new CashCard(null, 19.99, null);
+        CashCard cashCardUpdate = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(cashCardUpdate);
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/99000000000", HttpMethod.PUT, request, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         ResponseEntity<String> resultGet = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .getForEntity("/cashcards/99000000000", String.class);
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
         Number id = resultGetBody.read("$.id");
         Double amount = resultGetBody.read("$.amount");
+        String owner = resultGetBody.read("$.owner");
         assertThat(id).isEqualTo(99000000000L);
         assertThat(amount).isEqualTo(19.99);
+        assertThat(owner).isEqualTo("sarah1");
     }
 
     @Test
     void shouldNotUpdateACashCardThatDoesNotExist() {
-        CashCard unknownCard = new CashCard(null, 19.99, null);
+        CashCard unknownCard = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
         ResponseEntity<Void> response = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/99999", HttpMethod.PUT, request, Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void shouldNotUpdateACashCardThatIsOwnedBySomeoneElse() {
-        CashCard kumarsCard = new CashCard(null, 333.33, null);
+        CashCard kumarsCard = new CashCard(null, 333.33, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(kumarsCard);
         ResponseEntity<Void> response = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/102", HttpMethod.PUT, request, Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void shouldNotUpdateACashCardInvalidId() {
-        CashCard unknownCard = new CashCard(null, 19.99, null);
+        CashCard unknownCard = new CashCard(null, 19.99, null, true);
         HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/invalidid", HttpMethod.PUT, request, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -242,20 +245,25 @@ class CashCardApplicationTests {
     @DirtiesContext
     void shouldDeleteAnExistingCashCard() {
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/99000000000", HttpMethod.DELETE, null, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         ResponseEntity<String> resultGet = restTemplate
-                .withBasicAuth("sarah1", "abc123")
-                .getForEntity("/cashcards/99", String.class);
+                .withBasicAuth("sarah1", "admin123")
+                .getForEntity("/cashcards/99000000000", String.class);
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        ResponseEntity<String> resultAuditTrail = restTemplate
+                .withBasicAuth("sarah1", "admin123")
+                .getForEntity("/cashcards/audittrail/99000000000", String.class);
+        assertThat(resultAuditTrail.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void shouldNotDeleteACashCardThatDoesNotExist() {
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/99999", HttpMethod.DELETE, null, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -264,59 +272,30 @@ class CashCardApplicationTests {
     @DirtiesContext
     void shouldNotDeleteAnExistingCashCardThatIsOwnedBySomeoneElse() {
         ResponseEntity<Void> result = restTemplate
-                .withBasicAuth("sarah1", "abc123")
+                .withBasicAuth("sarah1", "admin123")
                 .exchange("/cashcards/102", HttpMethod.DELETE, null, Void.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
         ResponseEntity<String> resultGet = restTemplate
-                .withBasicAuth("kumar2", "xyz789")
+                .withBasicAuth("kumar2", "admin123")
                 .getForEntity("/cashcards/102", String.class);
         assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }
 
 /*
-
-al ejecutar los tests de mi aplicación Java Spring, se me genera este log:
-
-> Task :test
-CashCardApplicationTests > shouldReturnACashCardWhenDataIsSaved() PASSED
-CashCardApplicationTests > contextLoads() PASSED
-CashCardJson2Test > testSerialize() PASSED
-CashCardJson2Test > testDeserialize() PASSED
-<SPRING LOGO AND INFO TAGS>
-CashCardJsonTest > cashCardSerializationTest() PASSED
-CashCardJsonTest > cashCardDeserializationTest() PASSED
-BUILD SUCCESSFUL in 7s
-5 actionable tasks: 2 executed, 3 up-to-date
-12:32:56: Execution finished 'test'.
-
-
-se puede ver que los resultados de los tests contenidos en la clase CashCardApplicationTests figuran al
-principio, pero los resultados de los tests contenidos en la clase CashCardJson2Test se muestran casi
-al final del log. A que se debe esto? te paso la cabecera de las 3 clases:
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class CashCardApplicationTests
-
-@ContextConfiguration(classes = CashCardJson2Test.Config.class)
-class CashCardJson2Test
-
-@JsonTest
-class CashCardJsonTest
-
+al ejecutar tests, en el log se ven los resultados de los test desordenados. A que se debe esto?
 --------------------------------------------
-
 La diferencia en el orden de ejecución y en el registro de los resultados de tus pruebas se debe a cómo JUnit
 maneja las pruebas y sus configuraciones. Aquí te explico los detalles:
 
-    CashCardApplicationTests: Está anotada con @SpringBootTest, que inicia un contexto completo de Spring Boot.
-    Este tipo de prueba se ejecuta al principio porque generalmente necesita un tiempo de configuración más largo,
-    ya que se carga tod0 el contexto de la aplicación.
+    CashCardApplicationTests: Usa @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT),
+    que inicia un contexto completo de Spring Boot. Este tipo de prueba se ejecuta al principio porque
+    generalmente necesita un tiempo de configuración más largo, ya que se carga tod0 el contexto de la aplicación.
 
-    CashCardJson2Test: Usa @ContextConfiguration para definir un contexto de prueba específico. Esto puede
-    involucrar menos configuración comparado con @SpringBootTest, y puede ejecutarse en un orden diferente
-    dependiendo de cómo se configuren las tareas en el proyecto.
+    CashCardJson2Test: Usa @ContextConfiguration(classes = CashCardJson2Test.Config.class) para definir un
+    contexto de prueba específico. Esto puede involucrar menos configuración comparado con @SpringBootTest,
+    y puede ejecutarse en un orden diferente dependiendo de cómo se configuren las tareas en el proyecto.
 
     CashCardJsonTest: Está anotada con @JsonTest, que está diseñada para pruebas que se centran en la
     serialización y deserialización de JSON. Esta anotación carga solo los componentes necesarios para
@@ -329,5 +308,4 @@ organiza y ejecuta las pruebas.
 Si el orden de ejecución es importante para ti, puedes intentar ajustar el orden con configuraciones adicionales,
 pero generalmente, el comportamiento que estás viendo es normal dado el tipo de prueba y la configuración
 de Spring Boot.
-
  */

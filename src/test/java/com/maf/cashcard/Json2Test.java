@@ -24,7 +24,7 @@ class Json2Test {
 
     @SuppressWarnings("unused")
     private JacksonTester<CashCard> json;
-    CashCard cashCardBase = new CashCard(99000000000L, 123.45, "sarah1");
+    CashCard cashCardBase = new CashCard(99000000000L, 123.45, "sarah1", true);
 
 
     @Configuration
