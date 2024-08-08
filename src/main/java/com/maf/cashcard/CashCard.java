@@ -6,6 +6,6 @@ record CashCard(
         @Id Long id,
         Double amount,
         String owner,
-        boolean isActive
+        Boolean isActive
 ) {
 }
