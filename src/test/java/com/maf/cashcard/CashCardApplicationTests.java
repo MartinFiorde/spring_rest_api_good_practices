@@ -192,10 +192,21 @@ class CashCardApplicationTests {
     void shouldUpdateAnExistingCashCard() {
         CashCard cashCardUpdate = new CashCard(null, 19.99, null);
         HttpEntity<CashCard> request = new HttpEntity<>(cashCardUpdate);
-        ResponseEntity<Void> response = restTemplate
+        ResponseEntity<Void> result = restTemplate
                 .withBasicAuth("sarah1", "abc123")
                 .exchange("/cashcards/99000000000", HttpMethod.PUT, request, Void.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        ResponseEntity<String> resultGet = restTemplate
+                .withBasicAuth("sarah1", "abc123")
+                .getForEntity("/cashcards/99000000000", String.class);
+        assertThat(resultGet.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        DocumentContext resultGetBody = JsonPath.parse(resultGet.getBody());
+        Number id = resultGetBody.read("$.id");
+        Double amount = resultGetBody.read("$.amount");
+        assertThat(id).isEqualTo(99000000000L);
+        assertThat(amount).isEqualTo(19.99);
     }
 }
 

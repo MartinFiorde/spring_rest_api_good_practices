@@ -56,8 +56,12 @@ class CashCardController {
     }
 
     @PutMapping("/{requestedId}")
-    public ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate) {
-        // just return 204 NO CONTENT for now.
+    public ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardChanged, Principal principal) {
+        if (requestedId == null) return ResponseEntity.badRequest().build();
+        CashCard cashCardSearched = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        if (cashCardSearched == null) return ResponseEntity.notFound().build();
+        CashCard cashCardUpdated = new CashCard(cashCardSearched.id(),cashCardChanged.amount(),cashCardSearched.owner());
+        cashCardRepository.save(cashCardUpdated);
         return ResponseEntity.noContent().build();
     }
 }
