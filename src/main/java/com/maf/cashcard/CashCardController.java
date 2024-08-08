@@ -12,7 +12,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/cashcards")
@@ -39,9 +38,8 @@ class CashCardController {
 
     @GetMapping("/{requestedId}")
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
-        Optional<CashCard> cashCardOptional = Optional.ofNullable(cashCardRepository.findByIdAndOwner(requestedId, principal.getName()));
-        return cashCardOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-        //return cashCardOptional.isPresent() ? ResponseEntity.ok(cashCardOptional.get()) : ResponseEntity.notFound().build()
+        CashCard cashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        return cashCard != null ? ResponseEntity.ok(cashCard) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
