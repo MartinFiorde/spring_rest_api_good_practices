@@ -69,7 +69,7 @@ class CashCardApplicationTests {
     //@DirtiesContext
     void shouldCreateANewCashCard() {
         // ARRANGE
-        CashCard newCashCard = new CashCard(null, 250.00, "sarah1");
+        CashCard newCashCard = new CashCard(null, 250.00, null);
 
         // ASSERT
         ResponseEntity<Void> result = restTemplate
